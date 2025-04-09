@@ -1,5 +1,3 @@
-//HOSTED ON GITHUB PAGES. NO DATA CAN BE SAVED OR STORED
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
@@ -79,20 +77,19 @@ const difficultyLevels = {
   'Advanced': 1.2
 };
 
-const generateWorkout = (day, baseWeight, difficultyLevel, intensityLevel) => {
+const generateWorkout = (day, baseWeight, difficultyLevel) => {
   if (!exercises[day]) return [];
   const modifier = difficultyLevels[difficultyLevel] || 1;
-  const intensityMultiplier = intensityLevel === 'Low' ? 0.8 : intensityLevel === 'High' ? 1.2 : 1;
-
+  
   return exercises[day].map((exercise, index) => ({
     name: exercise,
     sets: 4,
     reps: exercise.includes('Recovery') || exercise.includes('Stretching') || 
           exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-          'N/A' : Math.round(10 * intensityMultiplier),
+          'N/A' : 10,
     weight: exercise.includes('Recovery') || exercise.includes('Stretching') || 
             exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-            'N/A' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier * intensityMultiplier)} lbs`,
+            'N/A' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
     completed: false,
     muscleGroup: muscleGroups[exercise] || 'General'
   }));
@@ -123,25 +120,24 @@ function App() {
     }
     return false;
   });
-  const [intensityLevel, setIntensityLevel] = useState('Moderate');
 
-  // Generate workout whenever day, baseWeight, difficulty, or intensity changes
+  // Generate workout whenever day, baseWeight, or difficulty changes
   useEffect(() => {
-    setWorkout(generateWorkout(day, baseWeight, difficultyLevel, intensityLevel));
-  }, [day, baseWeight, difficultyLevel, intensityLevel]);
+    setWorkout(generateWorkout(day, baseWeight, difficultyLevel));
+  }, [day, baseWeight, difficultyLevel]);
 
   // Handle rest timer countdown
   useEffect(() => {
-    let timer;
-    if (showRestTimer && restCountdown > 0) {
-      timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
-    } else if (showRestTimer && restCountdown === 0) {
-      setShowRestTimer(false);
-      setRestCountdown(customRestTime); // Reset restCountdown to customRestTime
-      handleNext();
-    }
-    return () => clearTimeout(timer);
-  }, [showRestTimer, restCountdown]);
+  let timer;
+  if (showRestTimer && restCountdown > 0) {
+    timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
+  } else if (showRestTimer && restCountdown === 0) {
+    setShowRestTimer(false);
+    setRestCountdown(customRestTime); // Reset restCountdown to customRestTime
+    handleNext();
+  }
+  return () => clearTimeout(timer);
+}, [showRestTimer, restCountdown]);
 
   // Track total workout time
   useEffect(() => {
@@ -182,6 +178,15 @@ function App() {
       ...exercise,
       completed: false
     })));
+  };
+
+  const handleCancelWorkout = () => {
+    setActive(false);
+    setCurrentSet(1);
+    setCurrentExerciseIndex(0);
+    setElapsedTime(0);
+    setShowRestTimer(false);
+    setRestCountdown(customRestTime); // Reset rest timer
   };
 
   const handleNext = () => {
@@ -264,23 +269,92 @@ function App() {
     <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} min-h-screen transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto p-4 sm:p-6">
         <header className="mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <h1 className="text-3xl font-bold text-center sm:text-left">Dumbbell Workout Planner</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">Dumbbell Workout Planner</h1>
             <button 
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 mt-4 sm:mt-0 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+              className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
           </div>
+          
+          {active && (
+            <div className="mt-2">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium">Progress</span>
+                <span className="text-sm font-medium">{Math.round(progressPercentage)}%</span>
+              </div>
+              <div className="w-full bg-gray-300 rounded-full h-2.5 dark:bg-gray-700">
+                <motion.div 
+                  className="bg-blue-600 h-2.5 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 0.5 }}
+                ></motion.div>
+              </div>
+              <div className="text-right text-sm mt-1">
+                <span className="font-mono">{formatTime(elapsedTime)}</span>
+              </div>
+            </div>
+          )}
         </header>
 
-<<<<<<< HEAD
-        <div className="grid grid-cols-2 gap-6">
-          {/* Content */}
-        </div>
-=======
-        {!active ? (
+        {active ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
+          >
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold mb-1">Set {currentSet} of 4</h2>
+              <div className="flex space-x-1">
+                {[1, 2, 3, 4].map(set => (
+                  <div 
+                    key={set}
+                    className={`h-1 flex-1 rounded-full ${set === currentSet ? 'bg-blue-500' : set < currentSet ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+                  ></div>
+                ))}
+              </div>
+            </div>
+            
+            {currentExercise && (
+              <motion.div
+                key={`${currentExerciseIndex}-${currentSet}`}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h3 className="text-2xl font-bold mb-2">{currentExercise.name}</h3>
+                <div className="flex items-center mb-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mr-2`}>
+                    {currentExercise.muscleGroup}
+                  </span>
+                  {currentExercise.reps !== 'N/A' && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
+                      {currentExercise.reps} reps @ {currentExercise.weight}
+                    </span>
+                  )}
+                </div>
+                
+                <button 
+                  onClick={completeRep}
+                  className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
+                >
+                  Complete & Rest
+                </button>
+              </motion.div>
+            )}
+
+            <button
+              onClick={handleCancelWorkout}
+              className="mt-4 w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-colors"
+            >
+              Cancel Workout
+            </button>
+          </motion.div>
+        ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -382,77 +456,6 @@ function App() {
               Start Workout
             </button>
           </motion.div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
-          >
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-1">Set {currentSet} of 4</h2>
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4].map(set => (
-                  <div 
-                    key={set}
-                    className={`h-1 flex-1 rounded-full ${set === currentSet ? 'bg-blue-500' : set < currentSet ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-            
-            {currentExercise && (
-              <motion.div
-                key={`${currentExerciseIndex}-${currentSet}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-              >
-                <h3 className="text-2xl font-bold mb-2">{currentExercise.name}</h3>
-                <div className="flex items-center mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mr-2`}>
-                    {currentExercise.muscleGroup}
-                  </span>
-                  {currentExercise.reps !== 'N/A' && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
-                      {currentExercise.reps} reps @ {currentExercise.weight}
-                    </span>
-                  )}
-                </div>
-                
-                <motion.div
-                  animate={{ 
-                    height: showInstructions ? 'auto' : '0px',
-                    opacity: showInstructions ? 1 : 0
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
-                >
-                  {showInstructions && (
-                    <div className={`p-4 rounded-md mb-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                      <p className="text-sm">{instructions[currentExercise.name]}</p>
-                    </div>
-                  )}
-                </motion.div>
-                
-                <div className="flex mb-4">
-                  <button 
-                    onClick={() => setShowInstructions(!showInstructions)}
-                    className={`text-sm px-4 py-2 rounded-md ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
-                  >
-                    {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
-                  </button>
-                </div>
-                
-                <button 
-                  onClick={completeRep}
-                  className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
-                >
-                  Complete & Rest
-                </button>
-              </motion.div>
-            )}
-          </motion.div>
         )}
         
         {showRestTimer && (
@@ -530,7 +533,6 @@ function App() {
             </div>
           </motion.div>
         )}
->>>>>>> parent of 7754423 (works before)
       </div>
     </div>
   );
