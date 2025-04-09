@@ -337,14 +337,25 @@ function App() {
               
                 <label className="block mb-6 font-medium">
                   Rest Between Sets (seconds):
-                  <input
-                    type="number"
-                    value={customRestTime}
-                    onChange={e => setCustomRestTime(parseInt(e.target.value) || 30)}
-                    className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-                    min="10"
-                    max="300"
-                  />
+                  <div className="mt-2 flex space-x-2">
+                    {['15', '30', '45', '60'].map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => setCustomRestTime(parseInt(time))}
+                        className={`px-4 py-2 rounded-md border font-medium ${
+                          customRestTime === parseInt(time)
+                            ? darkMode
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-blue-100 text-blue-800 border-blue-600'
+                            : darkMode
+                            ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+                            : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
+                        } transition-colors`}
+                      >
+                        {time}s
+                      </button>
+                    ))}
+                  </div>
                 </label>
               </div>
               
