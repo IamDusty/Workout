@@ -128,16 +128,16 @@ function App() {
 
   // Handle rest timer countdown
   useEffect(() => {
-    let timer;
-    if (showRestTimer && restCountdown > 0) {
-      timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
-    } else if (showRestTimer && restCountdown === 0) {
-      setShowRestTimer(false);
-      setRestCountdown(customRestTime);
-      handleNext();
-    }
-    return () => clearTimeout(timer);
-  }, [showRestTimer, restCountdown]);
+  let timer;
+  if (showRestTimer && restCountdown > 0) {
+    timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
+  } else if (showRestTimer && restCountdown === 0) {
+    setShowRestTimer(false);
+    setRestCountdown(customRestTime); // Reset restCountdown to customRestTime
+    handleNext();
+  }
+  return () => clearTimeout(timer);
+}, [showRestTimer, restCountdown]);
 
   // Track total workout time
   useEffect(() => {
@@ -234,6 +234,7 @@ function App() {
   };
 
   const completeRep = () => {
+    setRestCountdown(customRestTime); // Set restCountdown to the selected customRestTime
     setShowRestTimer(true);
   };
 
