@@ -124,6 +124,18 @@ function App() {
     return false;
   });
   const [intensityLevel, setIntensityLevel] = useState('Moderate');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // Consider screens <= 768px as mobile
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Generate workout whenever day, baseWeight, difficulty, or intensity changes
   useEffect(() => {
@@ -271,7 +283,7 @@ function App() {
 
   return (
     <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} min-h-screen transition-colors duration-300`}>
-      <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <div className={`${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto p-4 sm:p-6`}>
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <h1 className="text-3xl font-bold text-center sm:text-left">Dumbbell Workout Planner</h1>
@@ -284,7 +296,7 @@ function App() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-6`}>
           {active ? (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
