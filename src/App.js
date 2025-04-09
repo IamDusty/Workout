@@ -1,3 +1,5 @@
+//HOSTED ON GITHUB PAGES. NO DATA CAN BE SAVED OR STORED
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
@@ -77,19 +79,20 @@ const difficultyLevels = {
   'Advanced': 1.2
 };
 
-const generateWorkout = (day, baseWeight, difficultyLevel) => {
+const generateWorkout = (day, baseWeight, difficultyLevel, intensityLevel) => {
   if (!exercises[day]) return [];
   const modifier = difficultyLevels[difficultyLevel] || 1;
-  
+  const intensityMultiplier = intensityLevel === 'Low' ? 0.8 : intensityLevel === 'High' ? 1.2 : 1;
+
   return exercises[day].map((exercise, index) => ({
     name: exercise,
     sets: 4,
     reps: exercise.includes('Recovery') || exercise.includes('Stretching') || 
           exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-          'N/A' : 10,
+          'N/A' : Math.round(10 * intensityMultiplier),
     weight: exercise.includes('Recovery') || exercise.includes('Stretching') || 
             exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-            'N/A' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
+            'N/A' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier * intensityMultiplier)} lbs`,
     completed: false,
     muscleGroup: muscleGroups[exercise] || 'General'
   }));
@@ -120,11 +123,12 @@ function App() {
     }
     return false;
   });
+  const [intensityLevel, setIntensityLevel] = useState('Moderate');
 
-  // Generate workout whenever day, baseWeight, or difficulty changes
+  // Generate workout whenever day, baseWeight, difficulty, or intensity changes
   useEffect(() => {
-    setWorkout(generateWorkout(day, baseWeight, difficultyLevel));
-  }, [day, baseWeight, difficultyLevel]);
+    setWorkout(generateWorkout(day, baseWeight, difficultyLevel, intensityLevel));
+  }, [day, baseWeight, difficultyLevel, intensityLevel]);
 
   // Handle rest timer countdown
   useEffect(() => {
@@ -269,194 +273,166 @@ function App() {
     <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} min-h-screen transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto p-4 sm:p-6">
         <header className="mb-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Dumbbell Workout Planner</h1>
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <h1 className="text-3xl font-bold text-center sm:text-left">Dumbbell Workout Planner</h1>
             <button 
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+              className={`p-2 mt-4 sm:mt-0 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
           </div>
-          
-          {active && (
-            <div className="mt-2">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium">Progress</span>
-                <span className="text-sm font-medium">{Math.round(progressPercentage)}%</span>
-              </div>
-              <div className="w-full bg-gray-300 rounded-full h-2.5 dark:bg-gray-700">
-                <motion.div 
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercentage}%` }}
-                  transition={{ duration: 0.5 }}
-                ></motion.div>
-              </div>
-              <div className="text-right text-sm mt-1">
-                <span className="font-mono">{formatTime(elapsedTime)}</span>
-              </div>
-            </div>
-          )}
         </header>
 
-        {active ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
-          >
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-1">Set {currentSet} of 4</h2>
-              <div className="flex space-x-1">
-                {[1, 2, 3, 4].map(set => (
-                  <div 
-                    key={set}
-                    className={`h-1 flex-1 rounded-full ${set === currentSet ? 'bg-blue-500' : set < currentSet ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}
-                  ></div>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {active ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
+            >
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold mb-1">Set {currentSet} of 4</h2>
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4].map(set => (
+                    <div 
+                      key={set}
+                      className={`h-1 flex-1 rounded-full ${set === currentSet ? 'bg-blue-500' : set < currentSet ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+                    ></div>
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            {currentExercise && (
-              <motion.div
-                key={`${currentExerciseIndex}-${currentSet}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-              >
-                <h3 className="text-2xl font-bold mb-2">{currentExercise.name}</h3>
-                <div className="flex items-center mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mr-2`}>
-                    {currentExercise.muscleGroup}
-                  </span>
-                  {currentExercise.reps !== 'N/A' && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
-                      {currentExercise.reps} reps @ {currentExercise.weight}
+              
+              {currentExercise && (
+                <motion.div
+                  key={`${currentExerciseIndex}-${currentSet}`}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h3 className="text-2xl font-bold mb-2">{currentExercise.name}</h3>
+                  <div className="flex items-center mb-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mr-2`}>
+                      {currentExercise.muscleGroup}
                     </span>
-                  )}
+                    {currentExercise.reps !== 'N/A' && (
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
+                        {currentExercise.reps} reps @ {currentExercise.weight}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <button 
+                    onClick={completeRep}
+                    className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
+                  >
+                    Complete & Rest
+                  </button>
+                </motion.div>
+              )}
+
+              <button
+                onClick={handleCancelWorkout}
+                className="mt-4 w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-colors"
+              >
+                Cancel Workout
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 font-medium">
+                    Select Day:
+                    <select 
+                      value={day} 
+                      onChange={e => setDay(e.target.value)}
+                      className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                    >
+                      {Object.keys(exercises).map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block mb-2 font-medium">
+                    Dumbbell Weight (lbs):
+                    <input
+                      type="number"
+                      value={baseWeight}
+                      onChange={e => setBaseWeight(parseInt(e.target.value) || 0)}
+                      className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                      min="1"
+                    />
+                  </label>
+
+                  <label className="block mb-4 font-medium">
+                    Difficulty Level:
+                    <select 
+                      value={difficultyLevel} 
+                      onChange={e => setDifficultyLevel(e.target.value)}
+                      className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                    >
+                      {Object.keys(difficultyLevels).map(level => (
+                        <option key={level} value={level}>{level}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block mb-4 font-medium">
+                    Workout Intensity:
+                    <select 
+                      value={intensityLevel} 
+                      onChange={e => setIntensityLevel(e.target.value)}
+                      className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                    >
+                      {['Low', 'Moderate', 'High'].map(level => (
+                        <option key={level} value={level}>{level}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
                 
-                <button 
-                  onClick={completeRep}
-                  className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
-                >
-                  Complete & Rest
-                </button>
-              </motion.div>
-            )}
-
-            <button
-              onClick={handleCancelWorkout}
-              className="mt-4 w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-colors"
-            >
-              Cancel Workout
-            </button>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-lg shadow-md ${darkMode ? 'bg-gray-800' : 'bg-white'} mb-6`}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-2 font-medium">
-                  Select Day:
-                  <select 
-                    value={day} 
-                    onChange={e => setDay(e.target.value)}
-                    className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-                  >
-                    {Object.keys(exercises).map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </label>
-              
-                <label className="block mb-2 font-medium">
-                  Dumbbell Weight (lbs):
-                  <input
-                    type="number"
-                    value={baseWeight}
-                    onChange={e => setBaseWeight(parseInt(e.target.value) || 0)}
-                    className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-                    min="1"
-                  />
-                </label>
-              
-                <label className="block mb-4 font-medium">
-                  Difficulty Level:
-                  <select 
-                    value={difficultyLevel} 
-                    onChange={e => setDifficultyLevel(e.target.value)}
-                    className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-                  >
-                    {Object.keys(difficultyLevels).map(level => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
-                </label>
-              
-                <label className="block mb-6 font-medium">
-                  Rest Between Sets (seconds):
-                  <div className="mt-2 flex space-x-2">
-                    {['15', '30', '45', '60'].map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => setCustomRestTime(parseInt(time))}
-                        className={`px-4 py-2 rounded-md border font-medium ${
-                          customRestTime === parseInt(time)
-                            ? darkMode
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-blue-100 text-blue-800 border-blue-600'
-                            : darkMode
-                            ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
-                            : 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300'
-                        } transition-colors`}
-                      >
-                        {time}s
-                      </button>
-                    ))}
-                  </div>
-                </label>
+                <div>
+                  <h3 className="font-medium text-lg mb-3">Today's Workout:</h3>
+                  {workout.length > 0 ? (
+                    <ul className={`rounded-md border ${darkMode ? 'border-gray-700' : 'border-gray-200'} divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                      {workout.map((exercise, idx) => (
+                        <li key={idx} className="p-3 flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{exercise.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {exercise.reps === 'N/A' ? 'As needed' : `${exercise.sets} sets × ${exercise.reps} reps`} • {exercise.muscleGroup}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                              {exercise.weight}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400">No exercises scheduled for today.</p>
+                  )}
+                </div>
               </div>
               
-              <div>
-                <h3 className="font-medium text-lg mb-3">Today's Workout:</h3>
-                {workout.length > 0 ? (
-                  <ul className={`rounded-md border ${darkMode ? 'border-gray-700' : 'border-gray-200'} divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {workout.map((exercise, idx) => (
-                      <li key={idx} className="p-3 flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{exercise.name}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {exercise.reps === 'N/A' ? 'As needed' : `${exercise.sets} sets × ${exercise.reps} reps`} • {exercise.muscleGroup}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className={`font-medium ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                            {exercise.weight}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400">No exercises scheduled for today.</p>
-                )}
-              </div>
-            </div>
-            
-            <button 
-              onClick={handleStart}
-              className="mt-6 w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors"
-            >
-              Start Workout
-            </button>
-          </motion.div>
-        )}
+              <button 
+                onClick={handleStart}
+                className="mt-6 w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors"
+              >
+                Start Workout
+              </button>
+            </motion.div>
+          )}
+        </div>
         
         {showRestTimer && (
           <motion.div 
