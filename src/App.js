@@ -77,22 +77,31 @@ const difficultyLevels = {
   'Advanced': 1.2
 };
 
+// Helper function to check if an exercise is core or recovery focused
+const isWeightlessExercise = (exercise, day) => {
+  return day === 'Thursday' || // Core day
+         exercise.includes('Recovery') || 
+         exercise.includes('Stretching') || 
+         exercise.includes('Foam Rolling') || 
+         exercise.includes('Mobility');
+};
+
 const generateWorkout = (day, baseWeight, difficultyLevel) => {
   if (!exercises[day]) return [];
   const modifier = difficultyLevels[difficultyLevel] || 1;
   
-  return exercises[day].map((exercise, index) => ({
-    name: exercise,
-    sets: 4,
-    reps: exercise.includes('Recovery') || exercise.includes('Stretching') || 
-          exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-          'N/A' : 10,
-    weight: exercise.includes('Recovery') || exercise.includes('Stretching') || 
-            exercise.includes('Foam Rolling') || exercise.includes('Mobility') ? 
-            'N/A' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
-    completed: false,
-    muscleGroup: muscleGroups[exercise] || 'General'
-  }));
+  return exercises[day].map((exercise, index) => {
+    const isWeightless = isWeightlessExercise(exercise, day);
+    
+    return {
+      name: exercise,
+      sets: 4,
+      reps: isWeightless ? (day === 'Thursday' ? 15 : 'N/A') : 10,
+      weight: isWeightless ? 'Bodyweight' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
+      completed: false,
+      muscleGroup: muscleGroups[exercise] || 'General'
+    };
+  });
 };
 
 function App() {
@@ -128,16 +137,16 @@ function App() {
 
   // Handle rest timer countdown
   useEffect(() => {
-  let timer;
-  if (showRestTimer && restCountdown > 0) {
-    timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
-  } else if (showRestTimer && restCountdown === 0) {
-    setShowRestTimer(false);
-    setRestCountdown(customRestTime); // Reset restCountdown to customRestTime
-    handleNext();
-  }
-  return () => clearTimeout(timer);
-}, [showRestTimer, restCountdown]);
+    let timer;
+    if (showRestTimer && restCountdown > 0) {
+      timer = setTimeout(() => setRestCountdown(prev => prev - 1), 1000);
+    } else if (showRestTimer && restCountdown === 0) {
+      setShowRestTimer(false);
+      setRestCountdown(customRestTime); // Reset restCountdown to customRestTime
+      handleNext();
+    }
+    return () => clearTimeout(timer);
+  }, [showRestTimer, restCountdown]);
 
   // Track total workout time
   useEffect(() => {
@@ -186,6 +195,7 @@ function App() {
     setCurrentExerciseIndex(0);
     setElapsedTime(0);
     setShowRestTimer(false);
+    setShowInstructions(false);
     setRestCountdown(customRestTime); // Reset rest timer
   };
 
@@ -215,6 +225,9 @@ function App() {
     } else {
       completeWorkout();
     }
+    
+    // Close instructions if they were open
+    setShowInstructions(false);
   };
 
   const completeWorkout = () => {
@@ -255,6 +268,10 @@ function App() {
 
   const closeCongrats = () => {
     setShowCongrats(false);
+  };
+
+  const toggleInstructions = () => {
+    setShowInstructions(!showInstructions);
   };
 
   // Get current exercise
@@ -331,25 +348,42 @@ function App() {
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mr-2`}>
                     {currentExercise.muscleGroup}
                   </span>
-                  {currentExercise.reps !== 'N/A' && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
-                      {currentExercise.reps} reps @ {currentExercise.weight}
-                    </span>
-                  )}
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
+                    {currentExercise.reps === 'N/A' ? 'As needed' : `${currentExercise.reps} reps`} @ {currentExercise.weight}
+                  </span>
                 </div>
                 
-                <button 
-                  onClick={completeRep}
-                  className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
-                >
-                  Complete & Rest
-                </button>
+                {showInstructions && instructions[currentExercise.name] && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className={`mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}
+                  >
+                    <h4 className="font-medium mb-2">How to perform:</h4>
+                    <p>{instructions[currentExercise.name]}</p>
+                  </motion.div>
+                )}
+                
+                <div className="flex space-x-2 mb-4">
+                  <button 
+                    onClick={toggleInstructions}
+                    className={`flex-1 py-3 px-4 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} font-medium rounded-md shadow-sm transition-colors`}
+                  >
+                    {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+                  </button>
+                  <button 
+                    onClick={completeRep}
+                    className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
+                  >
+                    Complete & Rest
+                  </button>
+                </div>
               </motion.div>
             )}
 
             <button
               onClick={handleCancelWorkout}
-              className="mt-4 w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-colors"
+              className="mt-2 w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-colors"
             >
               Cancel Workout
             </button>
@@ -383,7 +417,14 @@ function App() {
                     onChange={e => setBaseWeight(parseInt(e.target.value) || 0)}
                     className={`mt-1 block w-full rounded-md border p-2 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
                     min="1"
+                    disabled={day === 'Thursday' || day === 'Sunday'} // Disable for core day and recovery day
                   />
+                  {day === 'Thursday' && (
+                    <p className="text-sm mt-1 text-gray-500 dark:text-gray-400">Core day - no weights needed</p>
+                  )}
+                  {day === 'Sunday' && (
+                    <p className="text-sm mt-1 text-gray-500 dark:text-gray-400">Recovery day - no weights needed</p>
+                  )}
                 </label>
               
                 <label className="block mb-4 font-medium">
