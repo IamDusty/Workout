@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Calorie & Macro Tracker</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .time-display {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title button {
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .columns {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .columns {
+                flex-direction: column;
+            }
+        }
+        
+        .progress-container {
+            margin-bottom: 15px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .progress-fill.calories {
+            background-color: var(--primary);
+        }
+        
+        .progress-fill.protein {
+            background-color: var(--success);
+        }
+        
+        .progress-fill.carbs {
+            background-color: var(--warning);
+        }
+        
+        .progress-fill.fat {
+            background-color: var(--danger);
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .food-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .food-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .food-info {
+            flex: 1;
+        }
+        
+        .food-name {
+            font-weight: bold;
+        }
+        
+        .food-macros {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .food-calories {
+            font-weight: bold;
+            margin-left: 15px;
+        }
+        
+        .food-actions {
+            margin-left: 10px;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Daily Calorie & Macro Tracker</h1>
+                <div class="time-display" id="timeDisplay"></div>
+            </div>
+        </header>
+        
+        <div class="columns">
+            <div class="column">
+                <div class="card" id="goals-card">
+                    <div class="card-title">
+                        <h2>Goals</h2>
+                        <button id="editGoalsBtn">Edit</button>
+                    </div>
+                    <div id="goalsDisplay">
+                        <div class="summary-item">
+                            <span>Calories:</span>
+                            <span id="calorieGoal">2000</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Protein:</span>
+                            <span id="proteinGoal">150g</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Carbs:</span>
+                            <span id="carbsGoal">250g</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Fat:</span>
+                            <span id="fatGoal">70g</span>
+                        </div>
+                    </div>
+                    <form id="goalsForm" style="display: none;">
+                        <div class="form-group">
+                            <label for="calories">Daily Calories:</label>
+                            <input type="number" id="calories" min="1000" max="10000" step="50" value="2000">
+                        </div>
+                        <div class="form-group">
+                            <label for="protein">Protein (g):</label>
+                            <input type="number" id="protein" min="10" max="500" step="5" value="150">
+                        </div>
+                        <div class="form-group">
+                            <label for="carbs">Carbs (g):</label>
+                            <input type="number" id="carbs" min="10" max="1000" step="5" value="250">
+                        </div>
+                        <div class="form-group">
+                            <label for="fat">Fat (g):</label>
+                            <input type="number" id="fat" min="10" max="300" step="5" value="70">
+                        </div>
+                        <button type="submit" class="btn-success">Save Goals</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Add Food</h2>
+                    </div>
+                    <form id="addFoodForm">
+                        <div class="form-group">
+                            <label for="foodName">Food Name:</label>
+                            <input type="text" id="foodName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="foodCalories">Calories:</label>
+                            <input type="number" id="foodCalories" min="0" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="foodProtein">Protein (g):</label>
+                            <input type="number" id="foodProtein" min="0" step="0.1" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="foodCarbs">Carbs (g):</label>
+                            <input type="number" id="foodCarbs" min="0" step="0.1" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="foodFat">Fat (g):</label>
+                            <input type="number" id="foodFat" min="0" step="0.1" value="0">
+                        </div>
+                        <button type="submit" class="btn-success">Add Food</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="column">
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Daily Progress</h2>
+                        <span id="resetCountdown"></span>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Calories</span>
+                            <span id="calorieProgress">0 / 2000</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill calories" id="calorieBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Protein</span>
+                            <span id="proteinProgress">0g / 150g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill protein" id="proteinBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Carbs</span>
+                            <span id="carbsProgress">0g / 250g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill carbs" id="carbsBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Fat</span>
+                            <span id="fatProgress">0g / 70g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill fat" id="fatBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary">
+                        <div class="summary-item">
+                            <span>Remaining Calories:</span>
+                            <span id="remainingCalories">2000</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remaining Protein:</span>
+                            <span id="remainingProtein">150g</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remaining Carbs:</span>
+                            <span id="remainingCarbs">250g</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remaining Fat:</span>
+                            <span id="remainingFat">70g</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Food Log</h2>
+                        <button id="clearLogBtn" class="btn-danger">Clear Log</button>
+                    </div>
+                    <div class="food-log" id="foodLog">
+                        <!-- Food items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            goals: {
+                calories: 2000,
+                protein: 150,
+                carbs: 250,
+                fat: 70
+            },
+            consumed: {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0
+            },
+            foods: [],
+            lastReset: new Date().setHours(0, 0, 0, 0)
+        };
+
+        // Load data from local storage
+        function loadData() {
+            const savedData = localStorage.getItem('calorieTracker');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                
+                // Check if we need to reset (new day)
+                const now = new Date().setHours(0, 0, 0, 0);
+                if (now > parsedData.lastReset) {
+                    // It's a new day, reset consumed values and food log
+                    parsedData.consumed = {
+                        calories: 0,
+                        protein: 0,
+                        carbs: 0,
+                        fat: 0
+                    };
+                    parsedData.foods = [];
+                    parsedData.lastReset = now;
+                }
+                
+                // Update state with saved data
+                Object.assign(state, parsedData);
+            }
+            
+            // Update UI with loaded data
+            updateUI();
+        }
+
+        // Save data to local storage
+        function saveData() {
+            localStorage.setItem('calorieTracker', JSON.stringify(state));
+        }
+
+        // Update the UI based on the current state
+        function updateUI() {
+            // Update goals display
+            document.getElementById('calorieGoal').textContent = state.goals.calories;
+            document.getElementById('proteinGoal').textContent = state.goals.protein + 'g';
+            document.getElementById('carbsGoal').textContent = state.goals.carbs + 'g';
+            document.getElementById('fatGoal').textContent = state.goals.fat + 'g';
+            
+            // Update form values
+            document.getElementById('calories').value = state.goals.calories;
+            document.getElementById('protein').value = state.goals.protein;
+            document.getElementById('carbs').value = state.goals.carbs;
+            document.getElementById('fat').value = state.goals.fat;
+            
+            // Update progress
+            document.getElementById('calorieProgress').textContent = `${state.consumed.calories} / ${state.goals.calories}`;
+            document.getElementById('proteinProgress').textContent = `${state.consumed.protein}g / ${state.goals.protein}g`;
+            document.getElementById('carbsProgress').textContent = `${state.consumed.carbs}g / ${state.goals.carbs}g`;
+            document.getElementById('fatProgress').textContent = `${state.consumed.fat}g / ${state.goals.fat}g`;
+            
+            // Update progress bars
+            const caloriePercentage = Math.min(100, (state.consumed.calories / state.goals.calories) * 100);
+            const proteinPercentage = Math.min(100, (state.consumed.protein / state.goals.protein) * 100);
+            const carbsPercentage = Math.min(100, (state.consumed.carbs / state.goals.carbs) * 100);
+            const fatPercentage = Math.min(100, (state.consumed.fat / state.goals.fat) * 100);
+            
+            document.getElementById('calorieBar').style.width = caloriePercentage + '%';
+            document.getElementById('proteinBar').style.width = proteinPercentage + '%';
+            document.getElementById('carbsBar').style.width = carbsPercentage + '%';
+            document.getElementById('fatBar').style.width = fatPercentage + '%';
+            
+            // Update remaining values
+            document.getElementById('remainingCalories').textContent = Math.max(0, state.goals.calories - state.consumed.calories);
+            document.getElementById('remainingProtein').textContent = Math.max(0, state.goals.protein - state.consumed.protein) + 'g';
+            document.getElementById('remainingCarbs').textContent = Math.max(0, state.goals.carbs - state.consumed.carbs) + 'g';
+            document.getElementById('remainingFat').textContent = Math.max(0, state.goals.fat - state.consumed.fat) + 'g';
+            
+            // Update food log
+            renderFoodLog();
+        }
+
+        // Render food log
+        function renderFoodLog() {
+            const foodLogElement = document.getElementById('foodLog');
+            foodLogElement.innerHTML = '';
+            
+            if (state.foods.length === 0) {
+                foodLogElement.innerHTML = '<div class="food-item">No foods logged today</div>';
+                return;
+            }
+            
+            state.foods.forEach((food, index) => {
+                const foodItem = document.createElement('div');
+                foodItem.className = 'food-item';
+                
+                foodItem.innerHTML = `
+                    <div class="food-info">
+                        <div class="food-name">${food.name}</div>
+                        <div class="food-macros">P: ${food.protein}g | C: ${food.carbs}g | F: ${food.fat}g</div>
+                    </div>
+                    <div class="food-calories">${food.calories} cal</div>
+                    <div class="food-actions">
+                        <button class="delete-btn" data-index="${index}">×</button>
+                    </div>
+                `;
+                
+                foodLogElement.appendChild(foodItem);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeFood(index);
+                });
+            });
+        }
+
+        // Add food to log
+        function addFood(food) {
+            state.foods.push(food);
+            
+            // Update consumed values
+            state.consumed.calories += food.calories;
+            state.consumed.protein += food.protein;
+            state.consumed.carbs += food.carbs;
+            state.consumed.fat += food.fat;
+            
+            // Update UI and save data
+            updateUI();
+            saveData();
+        }
+
+        // Remove food from log
+        function removeFood(index) {
+            const food = state.foods[index];
+            
+            // Update consumed values
+            state.consumed.calories -= food.calories;
+            state.consumed.protein -= food.protein;
+            state.consumed.carbs -= food.carbs;
+            state.consumed.fat -= food.fat;
+            
+            // Remove food from array
+            state.foods.splice(index, 1);
+            
+            // Update UI and save data
+            updateUI();
+            saveData();
+        }
+
+        // Clear food log
+        function clearFoodLog() {
+            if (confirm('Are you sure you want to clear your food log?')) {
+                state.foods = [];
+                state.consumed = {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0
+                };
+                
+                // Update UI and save data
+                updateUI();
+                saveData();
+            }
+        }
+
+        // Update time display and check for midnight reset
+        function updateTimeDisplay() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('timeDisplay').textContent = timeString;
+            
+            // Calculate time until midnight for reset countdown
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const timeUntilMidnight = tomorrow - now;
+            const hoursUntilMidnight = Math.floor(timeUntilMidnight / (1000 * 60 * 60));
+            const minutesUntilMidnight = Math.floor((timeUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('resetCountdown').textContent = `Resets in ${hoursUntilMidnight}h ${minutesUntilMidnight}m`;
+            
+            // Check if we need to reset (new day)
+            const todayStart = new Date(now).setHours(0, 0, 0, 0);
+            if (todayStart > state.lastReset) {
+                // It's a new day, reset consumed values and food log
+                state.consumed = {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0
+                };
+                state.foods = [];
+                state.lastReset = todayStart;
+                
+                // Update UI and save data
+                updateUI();
+                saveData();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved data
+            loadData();
+            
+            // Set up event listeners
+            document.getElementById('editGoalsBtn').addEventListener('click', function() {
+                document.getElementById('goalsDisplay').style.display = 'none';
+                document.getElementById('goalsForm').style.display = 'block';
+                this.style.display = 'none';
+            });
+            
+            document.getElementById('goalsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Update goals
+                state.goals = {
+                    calories: parseInt(document.getElementById('calories').value),
+                    protein: parseInt(document.getElementById('protein').value),
+                    carbs: parseInt(document.getElementById('carbs').value),
+                    fat: parseInt(document.getElementById('fat').value)
+                };
+                
+                // Hide form, show display
+                document.getElementById('goalsDisplay').style.display = 'block';
+                document.getElementById('goalsForm').style.display = 'none';
+                document.getElementById('editGoalsBtn').style.display = 'block';
+                
+                // Update UI and save data
+                updateUI();
+                saveData();
+            });
+            
+            document.getElementById('addFoodForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const food = {
+                    name: document.getElementById('foodName').value,
+                    calories: parseInt(document.getElementById('foodCalories').value),
+                    protein: parseFloat(document.getElementById('foodProtein').value),
+                    carbs: parseFloat(document.getElementById('foodCarbs').value),
+                    fat: parseFloat(document.getElementById('foodFat').value)
+                };
+                
+                // Add food
+                addFood(food);
+                
+                // Reset form
+                this.reset();
+                document.getElementById('foodName').focus();
+            });
+            
+            document.getElementById('clearLogBtn').addEventListener('click', clearFoodLog);
+            
+            // Update time display and check for reset every minute
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 60000);
+        });
+    </script>
+</body>
+</html>
