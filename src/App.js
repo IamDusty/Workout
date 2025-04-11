@@ -129,6 +129,7 @@ function App() {
     }
     return false;
   });
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Generate workout whenever day, baseWeight, or difficulty changes
   useEffect(() => {
@@ -167,6 +168,17 @@ function App() {
         setWorkoutHistory(JSON.parse(savedHistory));
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.relative')) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const formatTime = (seconds) => {
@@ -288,12 +300,48 @@ function App() {
         <header className="mb-8">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Dumbbell Workout Planner</h1>
-            <button 
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
+            <div className="flex items-center space-x-4">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+
+              {/* Hamburger Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'}`}
+                >
+                  ☰
+                </button>
+
+                {menuOpen && (
+                  <div className={`absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg`}>
+                    <ul className="py-2">
+                      <li>
+                        <a
+                          href="./caltracker/index.html"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          Calorie Tracker
+                        </a>
+                      </li>
+                      <li>
+                        <button
+                          onClick={() => setMenuOpen(false)} // Close menu when returning to home
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          Home
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           
           {active && (
