@@ -984,6 +984,7 @@ function App() {
   };
 
   const handleCancelWorkout = () => {
+    // eslint-disable-next-line no-restricted-globals
     if (confirm("Are you sure you want to end your workout?")) {
       setActive(false);
       setCurrentSet(1);
