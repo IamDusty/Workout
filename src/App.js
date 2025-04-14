@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ExerciseLibrary from './ExerciseLibrary';
 
 // Exercise data organized by day
 const exercises = {
@@ -1133,7 +1134,8 @@ function App() {
               handleStart={handleStart}
               darkMode={darkMode}
             />
-            
+            <ExerciseLibrary darkMode={darkMode} />
+             
             {workoutHistory.length > 0 && (
               <>
                 <WorkoutStats 
