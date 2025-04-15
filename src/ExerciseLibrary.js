@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 // Exercise data organized by muscle groups
-const exercisesByMuscleGroup = {
+export const exercisesByMuscleGroup = {
   Chest: [
     {
       name: 'Dumbbell Bench Press',
@@ -95,6 +95,18 @@ const exercisesByMuscleGroup = {
       muscles: 'Biceps, Forearms'
     },
     {
+      name: 'Concentration Curls',
+      instructions: 'Sit on a bench, lean forward with one arm braced against your inner thigh, holding a dumbbell. Curl the weight toward your shoulder, then lower it back down.',
+      reps: '10-12',
+      muscles: 'Biceps'
+    },
+    {
+      name: 'Zottman Curls',
+      instructions: 'Stand with dumbbells at your sides. Curl the weights up with palms facing up, then at the top rotate your wrists so palms face down, and lower the weights with palms down.',
+      reps: '10-12',
+      muscles: 'Biceps, Forearms'
+    },
+    {
       name: 'Tricep Dips',
       instructions: 'Sit on the edge of a bench or chair with hands gripping the edge beside your hips. Slide your butt off the bench, then bend your elbows to lower your body. Push back up to the starting position.',
       reps: '10-15',
@@ -105,17 +117,29 @@ const exercisesByMuscleGroup = {
       instructions: 'Lie on a bench holding dumbbells above your chest with arms extended. Bend your elbows to lower the weights toward your forehead, then extend your arms to return to the starting position.',
       reps: '10-12',
       muscles: 'Triceps'
+    },
+    {
+      name: 'Incline Curls',
+      instructions: 'Sit on an incline bench with a dumbbell in each hand hanging at your sides. Curl the weights toward your shoulders, then lower them back down.',
+      reps: '10-12',
+      muscles: 'Biceps'
+    },
+    {
+      name: 'Cross-body Hammer Curls',
+      instructions: 'Stand with a dumbbell in each hand at your sides. Curl one dumbbell up and across your body toward the opposite shoulder, then lower and repeat with the other arm.',
+      reps: '10-12 per arm',
+      muscles: 'Biceps, Forearms'
     }
   ],
   Legs: [
     {
-      name: 'Squats',
-      instructions: 'Stand with feet shoulder-width apart, holding dumbbells at your sides or at shoulder level. Bend your knees and hips to lower your body as if sitting in a chair, then push through your heels to return to standing.',
+      name: 'Goblet Squats',
+      instructions: 'Stand with feet shoulder-width apart, holding a dumbbell vertically close to your chest. Bend your knees and hips to lower your body, then push through your heels to return to standing.',
       reps: '10-15',
-      muscles: 'Quadriceps, Glutes, Hamstrings'
+      muscles: 'Quadriceps, Glutes, Core'
     },
     {
-      name: 'Lunges',
+      name: 'Dumbbell Lunges',
       instructions: 'Stand with dumbbells at your sides. Take a step forward with one leg and lower your body until both knees are bent at 90-degree angles. Push back up and repeat with the other leg.',
       reps: '10-12 per leg',
       muscles: 'Quadriceps, Glutes, Hamstrings'
@@ -127,10 +151,22 @@ const exercisesByMuscleGroup = {
       muscles: 'Hamstrings, Glutes, Lower Back'
     },
     {
+      name: 'Step-Ups',
+      instructions: 'Stand facing a bench or platform with dumbbells at your sides. Step up with one foot, pressing through the heel to bring your body up, then step back down and repeat with the other leg.',
+      reps: '10-12 per leg',
+      muscles: 'Quadriceps, Glutes'
+    },
+    {
       name: 'Calf Raises',
       instructions: 'Stand with dumbbells at your sides. Raise your heels off the ground by pushing through the balls of your feet, then lower back down.',
       reps: '15-20',
       muscles: 'Calves'
+    },
+    {
+      name: 'Dumbbell Squats',
+      instructions: 'Stand with feet shoulder-width apart, holding dumbbells at your sides. Bend your knees and hips to lower your body, then push through your heels to return to standing.',
+      reps: '10-15',
+      muscles: 'Quadriceps, Glutes, Hamstrings'
     }
   ],
   Core: [
@@ -139,6 +175,24 @@ const exercisesByMuscleGroup = {
       instructions: 'Sit on the floor with knees bent and feet lifted slightly. Hold a dumbbell with both hands and twist your torso to touch the weight to the floor on each side.',
       reps: '15-20 per side',
       muscles: 'Obliques, Abdominals'
+    },
+    {
+      name: 'Weighted Sit-ups',
+      instructions: 'Lie on your back with knees bent, holding a dumbbell against your chest. Use your abdominal muscles to sit up, then lower back down with control.',
+      reps: '12-15',
+      muscles: 'Abdominals'
+    },
+    {
+      name: 'Dumbbell Side Bends',
+      instructions: 'Stand with feet shoulder-width apart, holding a dumbbell in one hand. Bend sideways toward the weight, then return to an upright position.',
+      reps: '12-15 per side',
+      muscles: 'Obliques'
+    },
+    {
+      name: 'Leg Raises with Dumbbell',
+      instructions: 'Lie on your back with a dumbbell held between your feet. Keep your legs straight as you raise them toward the ceiling, then lower them back down without touching the floor.',
+      reps: '12-15',
+      muscles: 'Lower Abs'
     },
     {
       name: 'Plank',
@@ -151,14 +205,106 @@ const exercisesByMuscleGroup = {
       instructions: 'Lie on your back with hands behind your head and legs lifted. Bring one knee toward your chest while twisting to bring the opposite elbow toward that knee, then switch sides.',
       reps: '15-20 per side',
       muscles: 'Abdominals, Obliques'
+    }
+  ],
+  Recovery: [
+    {
+      name: 'Active Recovery',
+      instructions: 'Light activity such as walking, gentle cycling, or easy swimming to promote blood flow without straining muscles.',
+      reps: '15-30 minutes',
+      muscles: 'Total Body'
     },
     {
-      name: 'Mountain Climbers',
-      instructions: 'Start in a push-up position. Rapidly alternate bringing each knee toward your chest, as if running in place in a plank position.',
-      reps: '20-30 per side',
-      muscles: 'Core, Shoulders, Hip Flexors'
+      name: 'Light Stretching',
+      instructions: 'Gentle stretching focusing on major muscle groups, holding each stretch for 20-30 seconds without bouncing.',
+      reps: '10-15 minutes',
+      muscles: 'Total Body'
+    },
+    {
+      name: 'Foam Rolling',
+      instructions: 'Use a foam roller on tight muscles, rolling slowly and pausing on tender areas to release tension.',
+      reps: '1-2 minutes per muscle group',
+      muscles: 'Myofascial Release'
+    },
+    {
+      name: 'Mobility Work',
+      instructions: 'Gentle, controlled movements through a full range of motion to improve joint mobility and prevent injury.',
+      reps: '10-15 minutes',
+      muscles: 'Joint Mobility'
+    }
+  ],
+  FullBody: [
+    {
+      name: 'Full Body Circuit',
+      instructions: 'Perform each exercise for 45 seconds with minimal rest between exercises, focusing on form and control.',
+      reps: '45 seconds each',
+      muscles: 'Full Body'
+    },
+    {
+      name: 'Dumbbell Thrusters',
+      instructions: 'Hold dumbbells at shoulder height, squat down, then as you stand up, press the weights overhead in one fluid motion.',
+      reps: '12-15',
+      muscles: 'Shoulders, Quadriceps, Glutes'
+    },
+    {
+      name: 'Renegade Rows',
+      instructions: 'In plank position with hands on dumbbells, row one dumbbell up while balancing on the other, then alternate.',
+      reps: '8-10 per side',
+      muscles: 'Back, Core, Chest'
+    },
+    {
+      name: 'Dumbbell Burpees',
+      instructions: 'With dumbbells in hand, perform a burpee and add a dumbbell curl and press at the top of the movement.',
+      reps: '10-12',
+      muscles: 'Full Body, Cardiovascular'
     }
   ]
+};
+
+// Instructions for each exercise are now included in the exercisesByMuscleGroup object
+
+// Export muscle group mapping
+export const muscleGroups = {
+  'Dumbbell Bench Press': 'Chest, Shoulders, Triceps',
+  'Dumbbell Flyes': 'Chest, Shoulders',
+  'Push-Ups': 'Chest, Shoulders, Triceps, Core',
+  'Incline Dumbbell Press': 'Upper Chest, Shoulders, Triceps',
+  'Dumbbell Rows': 'Upper Back, Lats, Biceps',
+  'Renegade Rows': 'Back, Core, Shoulders',
+  'Pull-Ups': 'Lats, Upper Back, Biceps',
+  'Lat Pulldowns': 'Lats, Upper Back, Biceps',
+  'Shoulder Press': 'Shoulders, Triceps',
+  'Lateral Raises': 'Lateral Deltoids',
+  'Front Raises': 'Front Deltoids',
+  'Reverse Flyes': 'Rear Deltoids, Upper Back',
+  'Bicep Curls': 'Biceps',
+  'Hammer Curls': 'Biceps, Forearms',
+  'Concentration Curls': 'Biceps',
+  'Zottman Curls': 'Biceps, Forearms',
+  'Tricep Dips': 'Triceps',
+  'Skull Crushers': 'Triceps',
+  'Goblet Squats': 'Quadriceps, Glutes, Core',
+  'Dumbbell Lunges': 'Quadriceps, Glutes, Hamstrings',
+  'Romanian Deadlifts': 'Hamstrings, Glutes, Lower Back',
+  'Step-Ups': 'Quadriceps, Glutes',
+  'Calf Raises': 'Calves',
+  'Dumbbell Squats': 'Quadriceps, Glutes, Hamstrings',
+  'Russian Twists': 'Obliques, Core',
+  'Weighted Sit-ups': 'Abs, Core',
+  'Dumbbell Side Bends': 'Obliques',
+  'Leg Raises with Dumbbell': 'Lower Abs',
+  'Plank': 'Core, Shoulders, Back',
+  'Bicycle Crunches': 'Abdominals, Obliques',
+  'Incline Curls': 'Biceps',
+  'Cross-body Hammer Curls': 'Biceps, Forearms',
+  'Full Body Circuit': 'Full Body',
+  'Dumbbell Thrusters': 'Shoulders, Quadriceps, Glutes',
+  'Dumbbell Burpees': 'Full Body, Cardiovascular',
+  'Active Recovery': 'Recovery',
+  'Light Stretching': 'Flexibility',
+  'Foam Rolling': 'Myofascial Release',
+  'Mobility Work': 'Joint Mobility',
+  '21s': 'Biceps'
 };
 
 // Exercise Library Component

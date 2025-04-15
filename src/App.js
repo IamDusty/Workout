@@ -1,78 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import ExerciseLibrary from './ExerciseLibrary';
+import ExerciseLibrary, { exercisesByMuscleGroup, muscleGroups } from './ExerciseLibrary';
 
-// Exercise data organized by day
-const exercises = {
-  Monday: ['Bicep Curls', 'Hammer Curls', 'Concentration Curls', 'Zottman Curls'],
-  Tuesday: ['Goblet Squats', 'Dumbbell Lunges', 'Romanian Deadlifts', 'Step-Ups'],
-  Wednesday: ['Dumbbell Press', 'Lateral Raises', 'Front Raises', 'Reverse Flys'],
-  Thursday: ['Russian Twists', 'Weighted Sit-ups', 'Dumbbell Side Bends', 'Leg Raises with Dumbbell'],
-  Friday: ['Bicep Curls', 'Incline Curls', '21s', 'Cross-body Hammer Curls'],
-  Saturday: ['Full Body Circuit', 'Dumbbell Thrusters', 'Renegade Rows', 'Dumbbell Burpees'],
-  Sunday: ['Active Recovery', 'Light Stretching', 'Foam Rolling', 'Mobility Work']
+// Day-to-muscle group mapping
+const dayMuscleGroupMap = {
+  Monday: 'Arms',         // Arm Day
+  Tuesday: 'Legs',        // Leg Day
+  Wednesday: 'Shoulders', // Shoulder Day
+  Thursday: 'Core',       // Core Day
+  Friday: 'Arms',         // Arm Day (advanced)
+  Saturday: 'FullBody',   // Full Body Day
+  Sunday: 'Recovery'      // Recovery Day
 };
 
-// Exercise instructions
-const instructions = {
-  'Bicep Curls': 'Stand with a dumbbell in each hand. Curl the weights while keeping your elbows close to your torso.',
-  'Hammer Curls': 'Hold the dumbbells with a neutral grip and curl upwards, keeping palms facing each other.',
-  'Concentration Curls': 'Sit down and curl one dumbbell at a time with your elbow braced against your thigh.',
-  'Zottman Curls': 'Curl the dumbbells up with a standard grip, then rotate wrists at the top and lower slowly with a reverse grip.',
-  'Goblet Squats': 'Hold one dumbbell vertically at your chest and perform a squat.',
-  'Dumbbell Lunges': 'Hold a dumbbell in each hand and take a big step forward, lowering until both knees are at 90 degrees.',
-  'Romanian Deadlifts': 'Hold dumbbells in front and hinge at the hips, keeping your back straight and knees slightly bent.',
-  'Step-Ups': 'Hold dumbbells and step up onto a bench or platform, then step back down.',
-  'Dumbbell Press': 'Lie on a bench and press dumbbells upward from chest level.',
-  'Lateral Raises': 'Raise the dumbbells out to your sides until they reach shoulder height.',
-  'Front Raises': 'Lift the dumbbells in front of you until they reach shoulder height, keeping arms straight.',
-  'Reverse Flys': 'Bend over slightly and raise the dumbbells out to your sides while squeezing your shoulder blades.',
-  'Russian Twists': 'Sit and lean back slightly with a dumbbell, then twist your torso side to side.',
-  'Weighted Sit-ups': 'Hold a dumbbell against your chest and perform a sit-up.',
-  'Dumbbell Side Bends': 'Hold a dumbbell in one hand and bend sideways at the waist.',
-  'Leg Raises with Dumbbell': 'Hold a dumbbell between your feet and raise your legs off the ground while lying on your back.',
-  'Incline Curls': 'Sit on an incline bench and perform dumbbell curls with arms hanging down.',
-  '21s': 'Perform 7 partial curls from bottom to halfway, 7 from halfway to top, then 7 full curls.',
-  'Cross-body Hammer Curls': 'Curl the dumbbell across your body towards the opposite shoulder.',
-  'Full Body Circuit': 'Perform each exercise for 45 seconds with minimal rest between exercises, focusing on form and control.',
-  'Dumbbell Thrusters': 'Hold dumbbells at shoulder height, squat down, then as you stand up, press the weights overhead in one fluid motion.',
-  'Renegade Rows': 'In plank position with hands on dumbbells, row one dumbbell up while balancing on the other, then alternate.',
-  'Dumbbell Burpees': 'With dumbbells in hand, perform a burpee and add a dumbbell curl and press at the top of the movement.',
-  'Active Recovery': 'Light activity to promote blood flow and recovery without straining muscles.',
-  'Light Stretching': 'Gentle stretching focusing on major muscle groups to improve flexibility and reduce soreness.',
-  'Foam Rolling': 'Use a foam roller on tight muscles to release tension and improve recovery.',
-  'Mobility Work': 'Exercises focusing on joint mobility to improve range of motion and prevent injury.'
+// Function to get random items from an array
+const getRandomItems = (array, count) => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 };
 
-// Muscle group mapping
-const muscleGroups = {
-  'Bicep Curls': 'Biceps',
-  'Hammer Curls': 'Biceps, Forearms',
-  'Concentration Curls': 'Biceps',
-  'Zottman Curls': 'Biceps, Forearms',
-  'Goblet Squats': 'Quadriceps, Glutes, Core',
-  'Dumbbell Lunges': 'Quadriceps, Glutes, Hamstrings',
-  'Romanian Deadlifts': 'Hamstrings, Lower Back, Glutes',
-  'Step-Ups': 'Quadriceps, Glutes',
-  'Dumbbell Press': 'Chest, Shoulders, Triceps',
-  'Lateral Raises': 'Shoulders',
-  'Front Raises': 'Shoulders',
-  'Reverse Flys': 'Rear Deltoids, Upper Back',
-  'Russian Twists': 'Obliques, Core',
-  'Weighted Sit-ups': 'Abs, Core',
-  'Dumbbell Side Bends': 'Obliques',
-  'Leg Raises with Dumbbell': 'Lower Abs',
-  'Incline Curls': 'Biceps',
-  '21s': 'Biceps',
-  'Cross-body Hammer Curls': 'Biceps, Forearms',
-  'Full Body Circuit': 'Full Body',
-  'Dumbbell Thrusters': 'Shoulders, Quadriceps, Glutes',
-  'Renegade Rows': 'Back, Core, Chest',
-  'Dumbbell Burpees': 'Full Body, Cardiovascular',
-  'Active Recovery': 'Recovery',
-  'Light Stretching': 'Flexibility',
-  'Foam Rolling': 'Myofascial Release',
-  'Mobility Work': 'Joint Mobility'
+// Day information for tooltips
+const dayInfo = {
+  Monday: "Arm Day - Focus on biceps and forearm strength",
+  Tuesday: "Leg Day - Lower body strength and stability",
+  Wednesday: "Shoulder Day - Upper body pushing movements",
+  Thursday: "Core Day - Abdominal and trunk exercises",
+  Friday: "Arm Day - Advanced bicep techniques",
+  Saturday: "Full Body - Compound movements and cardio",
+  Sunday: "Recovery - Light activity to promote healing"
 };
 
 // Difficulty level modifiers
@@ -90,24 +45,32 @@ const isWeightlessExercise = (exercise, day) => {
          exercise.includes('Recovery') || 
          exercise.includes('Stretching') || 
          exercise.includes('Foam Rolling') || 
-         exercise.includes('Mobility');
+         exercise.includes('Mobility') ||
+         exercise.includes('Plank') ||
+         exercise.includes('Bicycle');
 };
 
 // Generate workout based on selected day, weight and difficulty
 const generateWorkout = (day, baseWeight, difficultyLevel) => {
-  if (!exercises[day]) return [];
+  const muscleGroup = dayMuscleGroupMap[day];
+  if (!muscleGroup || !exercisesByMuscleGroup[muscleGroup]) return [];
+  
+  const exercisesForDay = getRandomItems(exercisesByMuscleGroup[muscleGroup], 4);
   const modifier = difficultyLevels[difficultyLevel] || 1;
   
-  return exercises[day].map((exercise, index) => {
-    const isWeightless = isWeightlessExercise(exercise, day);
+  return exercisesForDay.map((exercise, index) => {
+    const isWeightless = isWeightlessExercise(exercise.name, day);
+    const repsFromRange = exercise.reps.includes('-') 
+      ? parseInt(exercise.reps.split('-')[1]) 
+      : (exercise.reps.includes('per') ? 10 : (isNaN(parseInt(exercise.reps)) ? 'N/A' : parseInt(exercise.reps)));
     
     return {
-      name: exercise,
+      name: exercise.name,
       sets: 4,
-      reps: isWeightless ? (day === 'Thursday' ? 15 : 'N/A') : 10,
+      reps: isWeightless ? (day === 'Thursday' ? 15 : 'N/A') : (isNaN(repsFromRange) ? 10 : repsFromRange),
       weight: isWeightless ? 'Bodyweight' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
       completed: false,
-      muscleGroup: muscleGroups[exercise] || 'General'
+      muscleGroup: exercise.muscles
     };
   });
 };
@@ -117,17 +80,6 @@ const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-// Day information for tooltips
-const dayInfo = {
-  Monday: "Arm Day - Focus on biceps and forearm strength",
-  Tuesday: "Leg Day - Lower body strength and stability",
-  Wednesday: "Shoulder Day - Upper body pushing movements",
-  Thursday: "Core Day - Abdominal and trunk exercises",
-  Friday: "Arm Day - Advanced bicep techniques",
-  Saturday: "Full Body - Compound movements and cardio",
-  Sunday: "Recovery - Light activity to promote healing"
 };
 
 // Component for rest timer
@@ -293,14 +245,17 @@ const ActiveWorkout = ({
           </span>
         </div>
         
-        {showInstructions && instructions[currentExercise.name] && (
+        {showInstructions && (
           <motion.div 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             className={`mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}
           >
             <h4 className="font-medium mb-2">How to perform:</h4>
-            <p>{instructions[currentExercise.name]}</p>
+            <p>{exercisesByMuscleGroup[dayMuscleGroupMap[currentExercise.day] || dayMuscleGroupMap[Object.keys(dayMuscleGroupMap).find(day => 
+              exercisesByMuscleGroup[dayMuscleGroupMap[day]].some(ex => ex.name === currentExercise.name)
+            )]]?.find(ex => ex.name === currentExercise.name)?.instructions || 
+              "Perform this exercise with proper form, focusing on controlled movements."}</p>
           </motion.div>
         )}
         
@@ -405,7 +360,7 @@ const SetupWorkout = ({
               <label className="block mb-2 font-medium text-sm">
                 Select Day
                 <div className="flex mt-2 flex-wrap gap-2">
-                  {Object.keys(exercises).map(d => (
+                  {Object.keys(dayMuscleGroupMap).map(d => (
                     <button
                       key={d}
                       onClick={() => setDay(d)}
@@ -574,11 +529,11 @@ const SetupWorkout = ({
               <tr className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
                 <th className="px-4 py-3 text-left">Day</th>
                 <th className="px-4 py-3 text-left">Focus</th>
-                <th className="px-4 py-3 text-left">Exercises</th>
+                <th className="px-4 py-3 text-left">Muscle Group</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {Object.keys(exercises).map(d => (
+              {Object.keys(dayMuscleGroupMap).map(d => (
                 <tr 
                   key={d} 
                   className={`${
@@ -594,18 +549,7 @@ const SetupWorkout = ({
                     {dayInfo[d].split(' - ')[0]}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {exercises[d].map((ex, i) => (
-                        <span 
-                          key={i}
-                          className={`inline-block px-2 py-0.5 text-xs rounded-full ${
-                            darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          {ex}
-                        </span>
-                      ))}
-                    </div>
+                    {dayMuscleGroupMap[d]}
                   </td>
                 </tr>
               ))}
@@ -693,7 +637,7 @@ const WorkoutStats = ({ workoutHistory, darkMode }) => {
   const avgTime = Math.round(totalTime / totalWorkouts);
   
   // Count workouts by day
-  const workoutsByDay = Object.keys(exercises).reduce((acc, day) => {
+  const workoutsByDay = Object.keys(dayMuscleGroupMap).reduce((acc, day) => {
     acc[day] = workoutHistory.filter(w => w.day === day).length;
     return acc;
   }, {});
@@ -783,7 +727,9 @@ const WorkoutStats = ({ workoutHistory, darkMode }) => {
   );
 };
 
-// Header component
+// This snippet focuses on the part with the potential error - the Header component
+// Likely in the menu section
+
 const Header = ({ 
   darkMode, 
   setDarkMode, 
