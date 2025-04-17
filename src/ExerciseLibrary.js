@@ -27,6 +27,24 @@ export const exercisesByMuscleGroup = {
       instructions: 'Lie on an incline bench with a dumbbell in each hand at chest level. Press the weights upward until your arms are extended, then lower them back to the starting position.',
       reps: '8-12',
       muscles: 'Upper Chest, Shoulders, Triceps'
+    },
+    {
+      name: 'Decline Push-Ups',
+      instructions: 'Place your feet on an elevated surface like a bench and hands on the floor. Lower your chest toward the floor and push back up, keeping your body in a straight line.',
+      reps: '10-15',
+      muscles: 'Lower Chest, Shoulders, Triceps'
+    },
+    {
+      name: 'Svend Press',
+      instructions: 'Press a weight plate or two dumbbells together between your palms at chest level. Extend your arms forward while maintaining pressure on the plate/dumbbells, then return to the starting position.',
+      reps: '12-15',
+      muscles: 'Inner Chest, Shoulders'
+    },
+    {
+      name: 'Dumbbell Pullover',
+      instructions: 'Lie on a bench with feet on the floor and a dumbbell held with both hands above your chest. Lower the weight behind your head in an arc motion while keeping a slight bend in your elbows, then return to the starting position.',
+      reps: '10-12',
+      muscles: 'Chest, Lats, Serratus Anterior'
     }
   ],
   Back: [
@@ -53,7 +71,26 @@ export const exercisesByMuscleGroup = {
       instructions: 'Sit at a lat pulldown machine, grab the bar with hands wider than shoulder-width. Pull the bar down to your chest, then slowly return to the starting position.',
       reps: '10-12',
       muscles: 'Lats, Upper Back, Biceps'
-    }
+    },
+    {
+      name: 'Meadows Rows',
+      instructions: 'Set a barbell or landmine in a corner. Holding the end with one hand, position yourself parallel to the bar. Pull the weight up toward your hip with your elbow leading, then lower back down with control.',
+      reps: '8-10 per side',
+      muscles: 'Upper Back, Lats, Rear Deltoids'
+    },
+    {
+      name: 'Straight Arm Pulldowns',
+      instructions: 'Stand facing a cable machine with high pulley attachment. Grab the handle with both hands, step back, and with straight arms, pull the cable down from overhead to your thighs, then return to the starting position.',
+      reps: '12-15',
+      muscles: 'Lats, Teres Major'
+    },
+    {
+      name: 'Dumbbell Deadstop Rows',
+      instructions: 'Position yourself in a bent-over row stance with a dumbbell in one hand. Lower the weight completely to the floor, pause briefly to eliminate momentum, then pull up powerfully to your hip before repeating.',
+      reps: '8-12 per side',
+      muscles: 'Mid Back, Lats, Traps'
+    },
+    
   ],
   Shoulders: [
     {
@@ -79,6 +116,24 @@ export const exercisesByMuscleGroup = {
       instructions: 'Bend at the waist with dumbbells hanging down. Raise the weights out to the sides, squeezing your shoulder blades together, then lower them back down.',
       reps: '12-15',
       muscles: 'Rear Deltoids, Upper Back'
+    },
+    {
+      name: 'Arnold Press',
+      instructions: 'Sit with dumbbells at shoulder height, palms facing you. As you press upward, rotate your palms to face forward at the top of the movement, then reverse the motion as you lower.',
+      reps: '10-12',
+      muscles: 'Shoulders, Triceps'
+    },
+    {
+      name: 'Face Pulls',
+      instructions: 'Set a cable pulley to upper chest height with a rope attachment. Pull the rope toward your face with elbows high, squeezing your shoulder blades together at the end of the movement, then return to the starting position.',
+      reps: '12-15',
+      muscles: 'Rear Deltoids, Upper Back, Rotator Cuff'
+    },
+    {
+      name: 'Landmine Press',
+      instructions: 'Place one end of a barbell in a corner or landmine attachment. Holding the other end at shoulder height, press it upward and slightly away from your body, then lower it back to the starting position.',
+      reps: '8-12 per side',
+      muscles: 'Shoulders, Upper Chest, Triceps'
     }
   ],
   Arms: [
@@ -129,6 +184,30 @@ export const exercisesByMuscleGroup = {
       instructions: 'Stand with a dumbbell in each hand at your sides. Curl one dumbbell up and across your body toward the opposite shoulder, then lower and repeat with the other arm.',
       reps: '10-12 per arm',
       muscles: 'Biceps, Forearms'
+    },
+    {
+      name: 'Preacher Curls',
+      instructions: 'Sit at a preacher curl bench with arms resting on the pad and a dumbbell in your hand. Curl the weight up toward your shoulder, then lower it back down with control.',
+      reps: '10-12',
+      muscles: 'Biceps (especially lower portion)'
+    },
+    {
+      name: 'Overhead Tricep Extensions',
+      instructions: 'Stand holding a dumbbell with both hands above your head. Keeping your upper arms close to your ears, lower the weight behind your head by bending at the elbows, then extend your arms to return to the starting position.',
+      reps: '10-12',
+      muscles: 'Triceps (long head emphasis)'
+    },
+    {
+      name: 'Spider Curls',
+      instructions: 'Lie face down on an incline bench with arms hanging straight down holding dumbbells. Curl the weights toward your shoulders without moving your upper arms, then lower back down.',
+      reps: '10-12',
+      muscles: 'Biceps (short head emphasis)'
+    },
+    {
+      name: 'Bench Dips',
+      instructions: 'Position yourself between two benches, hands on one bench behind you and feet on the other bench in front of you. Lower your body by bending your elbows, then push back up to the starting position.',
+      reps: '12-15',
+      muscles: 'Triceps, Chest, Shoulders'
     }
   ],
   Legs: [
@@ -167,6 +246,30 @@ export const exercisesByMuscleGroup = {
       instructions: 'Stand with feet shoulder-width apart, holding dumbbells at your sides. Bend your knees and hips to lower your body, then push through your heels to return to standing.',
       reps: '10-15',
       muscles: 'Quadriceps, Glutes, Hamstrings'
+    },
+    {
+      name: 'Bulgarian Split Squats',
+      instructions: 'Stand in a split stance with your back foot elevated on a bench. Hold dumbbells at your sides and lower your body by bending your front knee until your thigh is parallel to the ground, then push back up.',
+      reps: '10-12 per leg',
+      muscles: 'Quadriceps, Glutes, Hamstrings'
+    },
+    {
+      name: 'Dumbbell Hip Thrusts',
+      instructions: 'Sit with your upper back against a bench, knees bent, feet flat on the ground, and a dumbbell on your hips. Lower your hips toward the ground, then push through your heels to lift your hips up until your body forms a straight line from knees to shoulders.',
+      reps: '12-15',
+      muscles: 'Glutes, Hamstrings'
+    },
+    {
+      name: 'Curtsy Lunges',
+      instructions: 'Stand holding dumbbells at your sides. Step one foot behind and across your body, bending both knees as if curtsying. Return to standing, then repeat on the other side.',
+      reps: '10-12 per side',
+      muscles: 'Glutes (especially medius), Quadriceps'
+    },
+    {
+      name: 'Single-Leg RDLs',
+      instructions: 'Stand on one leg holding a dumbbell in the opposite hand. Hinge forward at the hip while extending your free leg behind you for balance. Lower the weight toward the floor while keeping your back flat, then return to standing.',
+      reps: '10-12 per leg',
+      muscles: 'Hamstrings, Glutes, Lower Back, Core'
     }
   ],
   Core: [
@@ -205,6 +308,30 @@ export const exercisesByMuscleGroup = {
       instructions: 'Lie on your back with hands behind your head and legs lifted. Bring one knee toward your chest while twisting to bring the opposite elbow toward that knee, then switch sides.',
       reps: '15-20 per side',
       muscles: 'Abdominals, Obliques'
+    },
+    {
+      name: 'Dead Bug',
+      instructions: 'Lie on your back with arms extended toward the ceiling and knees bent at 90 degrees. Simultaneously lower one arm overhead and extend the opposite leg, maintaining contact between your lower back and the floor. Return to the starting position and repeat on the other side.',
+      reps: '10-12 per side',
+      muscles: 'Deep Core, Transverse Abdominis'
+    },
+    {
+      name: 'Pallof Press',
+      instructions: 'Stand sideways to a cable machine with the handle at chest height. Holding the handle with both hands at your chest, step away to create tension. Press the handle away from your chest without rotating your torso, then return to the starting position.',
+      reps: '12-15 per side',
+      muscles: 'Core Anti-Rotation, Obliques'
+    },
+    {
+      name: 'Hollow Body Hold',
+      instructions: 'Lie on your back and lift your shoulders and legs off the floor, arms extended overhead. Keep your lower back pressed into the floor and hold this position, creating a slight C-curve with your body.',
+      reps: '20-30 seconds',
+      muscles: 'Entire Core, Hip Flexors'
+    },
+    {
+      name: 'Copenhagen Plank',
+      instructions: 'Lie on your side with your forearm on the ground and bottom leg extended. Place your top leg on a bench or chair, supporting your weight between your forearm and the side of your lower leg. Lift your hips to create a straight line with your body and hold.',
+      reps: '20-30 seconds per side',
+      muscles: 'Obliques, Hip Adductors, Core'
     }
   ],
   Recovery: [
@@ -231,6 +358,24 @@ export const exercisesByMuscleGroup = {
       instructions: 'Gentle, controlled movements through a full range of motion to improve joint mobility and prevent injury.',
       reps: '10-15 minutes',
       muscles: 'Joint Mobility'
+    },
+    {
+      name: 'Dynamic Stretching',
+      instructions: 'Perform controlled movements through a full range of motion, such as arm circles, leg swings, and torso twists, to increase blood flow and prepare muscles for activity.',
+      reps: '8-10 per movement',
+      muscles: 'Total Body Mobility'
+    },
+    {
+      name: 'Yoga Flow',
+      instructions: 'Move through a sequence of poses focusing on breathing and mindful movement to improve flexibility, balance, and mental focus.',
+      reps: '15-20 minutes',
+      muscles: 'Full Body Integration'
+    },
+    {
+      name: 'Self-Myofascial Release',
+      instructions: 'Use tools like massage balls or foam rollers to apply pressure to tight muscles and fascia, helping to release tension and improve tissue quality.',
+      reps: '1-2 minutes per area',
+      muscles: 'Target Specific Tight Areas'
     }
   ],
   FullBody: [
@@ -256,6 +401,30 @@ export const exercisesByMuscleGroup = {
       name: 'Dumbbell Burpees',
       instructions: 'With dumbbells in hand, perform a burpee and add a dumbbell curl and press at the top of the movement.',
       reps: '10-12',
+      muscles: 'Full Body, Cardiovascular'
+    },
+    {
+      name: 'Turkish Get-Up',
+      instructions: 'Lie on your back holding a dumbbell in one hand extended toward the ceiling. Using a specific sequence of movements, stand up while keeping the weight overhead, then reverse the sequence to return to the starting position.',
+      reps: '3-5 per side',
+      muscles: 'Shoulders, Core, Hips, Legs'
+    },
+    {
+      name: 'Dumbbell Clean and Press',
+      instructions: 'Start with dumbbells at your sides. In one fluid motion, pull the weights up to your shoulders, dip slightly, then press them overhead. Lower them back to your shoulders, then to your sides to complete one rep.',
+      reps: '8-10',
+      muscles: 'Shoulders, Legs, Back, Core'
+    },
+    {
+      name: 'Man Makers',
+      instructions: 'Start in a push-up position with a dumbbell in each hand. Perform a push-up, then row one dumbbell to your hip. Row the other dumbbell, then jump your feet toward your hands and stand up, cleaning the dumbbells to your shoulders and pressing them overhead. Reverse the movement to return to the starting position.',
+      reps: '5-8',
+      muscles: 'Full Body, Cardiovascular'
+    },
+    {
+      name: 'Devil\'s Press',
+      instructions: 'Start standing with dumbbells at your sides. Drop into a burpee position, perform a push-up, then jump your feet toward your hands. Stand up while simultaneously swinging and pressing the dumbbells overhead in one fluid motion. Lower the weights back to your sides to complete one rep.',
+      reps: '6-10',
       muscles: 'Full Body, Cardiovascular'
     }
   ]
@@ -304,7 +473,35 @@ export const muscleGroups = {
   'Light Stretching': 'Flexibility',
   'Foam Rolling': 'Myofascial Release',
   'Mobility Work': 'Joint Mobility',
-  '21s': 'Biceps'
+  '21s': 'Biceps',
+  'Decline Push-Ups': 'Lower Chest, Shoulders, Triceps',
+  'Svend Press': 'Inner Chest, Shoulders',
+  'Dumbbell Pullover': 'Chest, Lats, Serratus Anterior',
+  'Meadows Rows': 'Upper Back, Lats, Rear Deltoids',
+  'Straight Arm Pulldowns': 'Lats, Teres Major',
+  'Dumbbell Deadstop Rows': 'Mid Back, Lats, Traps',
+  'Arnold Press': 'Shoulders, Triceps',
+  'Face Pulls': 'Rear Deltoids, Upper Back, Rotator Cuff',
+  'Landmine Press': 'Shoulders, Upper Chest, Triceps',
+  'Preacher Curls': 'Biceps (especially lower portion)',
+  'Overhead Tricep Extensions': 'Triceps (long head emphasis)',
+  'Spider Curls': 'Biceps (short head emphasis)',
+  'Bench Dips': 'Triceps, Chest, Shoulders',
+  'Bulgarian Split Squats': 'Quadriceps, Glutes, Hamstrings',
+  'Dumbbell Hip Thrusts': 'Glutes, Hamstrings',
+  'Curtsy Lunges': 'Glutes (especially medius), Quadriceps',
+  'Single-Leg RDLs': 'Hamstrings, Glutes, Lower Back, Core',
+  'Dead Bug': 'Deep Core, Transverse Abdominis',
+  'Pallof Press': 'Core Anti-Rotation, Obliques',
+  'Hollow Body Hold': 'Entire Core, Hip Flexors',
+  'Copenhagen Plank': 'Obliques, Hip Adductors, Core',
+  'Dynamic Stretching': 'Total Body Mobility',
+  'Yoga Flow': 'Full Body Integration',
+  'Self-Myofascial Release': 'Target Specific Tight Areas',
+  'Turkish Get-Up': 'Shoulders, Core, Hips, Legs',
+  'Dumbbell Clean and Press': 'Shoulders, Legs, Back, Core',
+  'Man Makers': 'Full Body, Cardiovascular',
+  'Devil\'s Press': 'Full Body, Cardiovascular'
 };
 
 // Exercise Library Component
