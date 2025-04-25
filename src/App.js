@@ -8,7 +8,7 @@ const dayMuscleGroupMap = {
   Tuesday: 'Legs',        // Leg Day
   Wednesday: 'Shoulders', // Shoulder Day
   Thursday: 'Core',       // Core Day
-  Friday: 'Arms',         // Arm Day (advanced)
+  Friday: 'Back',         // Back Day
   Saturday: 'FullBody',   // Full Body Day
   Sunday: 'Recovery'      // Recovery Day
 };
@@ -21,11 +21,11 @@ const getRandomItems = (array, count) => {
 
 // Day information for tooltips
 const dayInfo = {
-  Monday: "Arm Day - Focus on biceps and forearm strength",
+  Monday: "Arm Day - Focus on biceps and triceps strength",
   Tuesday: "Leg Day - Lower body strength and stability",
   Wednesday: "Shoulder Day - Upper body pushing movements",
   Thursday: "Core Day - Abdominal and trunk exercises",
-  Friday: "Arm Day - Advanced bicep techniques",
+  Friday: "Back Day - Upper body pulling movements",
   Saturday: "Full Body - Compound movements and cardio",
   Sunday: "Recovery - Light activity to promote healing"
 };
@@ -55,22 +55,141 @@ const generateWorkout = (day, baseWeight, difficultyLevel) => {
   const muscleGroup = dayMuscleGroupMap[day];
   if (!muscleGroup || !exercisesByMuscleGroup[muscleGroup]) return [];
   
-  const exercisesForDay = getRandomItems(exercisesByMuscleGroup[muscleGroup], 4);
+  const exercisesForDay = getRandomItems(exercisesByMuscleGroup[muscleGroup], 5);
   const modifier = difficultyLevels[difficultyLevel] || 1;
+  
+  // Exercise-specific rep ranges based on typical training protocols
+  const getOptimalRepRange = (exercise, muscleGroup) => {
+    // Time-based exercises
+    if (exercise.includes('Plank') || exercise.includes('Hold')) {
+      return 'Time-based';
+    }
+    
+    // High rep ranges (endurance-focused)
+    if (exercise.includes('Calf Raises') || 
+        exercise.includes('Recovery') ||
+        exercise.includes('Stretching') ||
+        exercise.includes('Bicycle')) {
+      return '15-20';
+    }
+    
+    // Compound heavy movements (strength-focused)
+    if (exercise.includes('Deadlift') || 
+        exercise.includes('Squat') || 
+        exercise.includes('Press') || 
+        exercise.includes('Clean') ||
+        exercise.includes('Turkish Get-Up')) {
+      return '6-10';
+    }
+    
+    // Isolation exercises (hypertrophy-focused)
+    if (exercise.includes('Curl') || 
+        exercise.includes('Extension') || 
+        exercise.includes('Raise') ||
+        exercise.includes('Flye')) {
+      return '10-15';
+    }
+    
+    // Core exercises
+    if (muscleGroup === 'Core') {
+      return '12-20';
+    }
+    
+    // Default rep range if nothing specific matches
+    return '8-12';
+  };
+  
+  // Varied set counts based on exercise complexity
+  const getSetCount = (exercise) => {
+    // Complex exercises get fewer sets due to higher intensity
+    if (exercise.includes('Clean') || 
+        exercise.includes('Turkish') ||
+        exercise.includes('Devil\'s Press') ||
+        exercise.includes('Man Makers')) {
+      return 3;
+    }
+    
+    // Recovery exercises get more sets but lower intensity
+    if (exercise.includes('Recovery') ||
+        exercise.includes('Stretching') ||
+        exercise.includes('Mobility')) {
+      return 2;
+    }
+    
+    // Standard set count for most exercises
+    return 4;
+  };
   
   return exercisesForDay.map((exercise, index) => {
     const isWeightless = isWeightlessExercise(exercise.name, day);
-    const repsFromRange = exercise.reps.includes('-') 
-      ? parseInt(exercise.reps.split('-')[1]) 
-      : (exercise.reps.includes('per') ? 10 : (isNaN(parseInt(exercise.reps)) ? 'N/A' : parseInt(exercise.reps)));
+    const optimalRange = getOptimalRepRange(exercise.name, muscleGroup);
+    
+    let reps;
+    if (optimalRange === 'Time-based') {
+      reps = '30-45 sec';
+    } else if (isWeightless) {
+      reps = day === 'Thursday' ? '15-20' : 'N/A';
+    } else if (exercise.reps.includes('sec') || exercise.reps.includes('seconds') || exercise.reps.includes('minute')) {
+      reps = exercise.reps; // Keep time-based reps as is
+    } else {
+      // Parse the rep range and adjust based on difficulty
+      const repsParts = optimalRange.split('-').map(n => parseInt(n));
+      if (repsParts.length === 2) {
+        // Adjust rep range based on difficulty
+        if (difficultyLevel === 'Beginner') {
+          reps = `${repsParts[0]}-${repsParts[0] + Math.floor((repsParts[1] - repsParts[0]) * 0.7)}`;
+        } else if (difficultyLevel === 'Advanced' || difficultyLevel === 'Expert') {
+          // Decrease reps slightly for advanced users (using heavier weights)
+          reps = `${Math.max(repsParts[0] - 1, 4)}-${repsParts[1] - 2}`;
+        } else {
+          reps = optimalRange;
+        }
+      } else {
+        reps = optimalRange;
+      }
+    }
+    
+    // Vary weights between exercises more meaningfully
+    let weight;
+    if (isWeightless) {
+      weight = 'Bodyweight';
+    } else {
+      // Base weight modification based on exercise type
+      let weightMod = 1.0;
+      
+      // Heavier for compound movements
+      if (exercise.name.includes('Press') || 
+          exercise.name.includes('Row') || 
+          exercise.name.includes('Deadlift') ||
+          exercise.name.includes('Squat')) {
+        weightMod = 1.2;
+      }
+      
+      // Lighter for isolation movements
+      if (exercise.name.includes('Raise') || 
+          exercise.name.includes('Curl') ||
+          exercise.name.includes('Extension')) {
+        weightMod = 0.8;
+      }
+      
+      // Apply difficulty modifier
+      weightMod *= (modifier || 1);
+      
+      // Calculate different weights for variety
+      const exerciseWeight = Math.round(baseWeight * weightMod);
+      
+      // Add small variation per exercise
+      weight = `${exerciseWeight + (index % 3) * 5} lbs`;
+    }
     
     return {
       name: exercise.name,
-      sets: 4,
-      reps: isWeightless ? (day === 'Thursday' ? 15 : 'N/A') : (isNaN(repsFromRange) ? 10 : repsFromRange),
-      weight: isWeightless ? 'Bodyweight' : `${Math.round((index % 2 === 0 ? baseWeight + 5 : baseWeight) * modifier)} lbs`,
+      sets: getSetCount(exercise.name),
+      reps: reps,
+      weight: weight,
       completed: false,
-      muscleGroup: exercise.muscles
+      muscleGroup: exercise.muscles,
+      day: day
     };
   });
 };
@@ -86,16 +205,45 @@ const formatTime = (seconds) => {
 const RestTimer = ({ restCountdown, customRestTime, skipRest, nextExercise }) => {
   const progressPercentage = (customRestTime - restCountdown) / customRestTime * 100;
   
+  // Add some motivational quotes for rest periods
+  const restQuotes = [
+    "Rest is part of the process, not the absence of it.",
+    "Recovery is where the growth happens.",
+    "Breathe deep, recover strong.",
+    "Quality rest leads to quality performance.",
+    "The pause between sets is as important as the sets themselves."
+  ];
+
+  // Pick a random quote
+  const randomQuote = restQuotes[Math.floor(Math.random() * restQuotes.length)];
+  
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70"
     >
-      <div className="p-8 rounded-xl shadow-xl bg-gray-800 max-w-md w-full text-center">
-        <h3 className="text-xl font-bold mb-2 text-white">Rest Time</h3>
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", damping: 15 }}
+        className="p-8 rounded-xl shadow-xl bg-gray-800 max-w-md w-full text-center border border-blue-500/20"
+      >
+        <div className="flex items-center justify-center space-x-2 mb-4">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="bg-blue-500 p-1 rounded-full"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+          </motion.div>
+          <h3 className="text-xl font-bold text-white">Rest Time</h3>
+        </div>
+        
         <div className="flex justify-center my-6">
-          <div className="w-40 h-40 rounded-full flex items-center justify-center border-8 border-blue-500 relative">
+          <div className="w-48 h-48 rounded-full flex items-center justify-center border-8 border-blue-500/50 relative">
             <div 
               className="absolute inset-0 rounded-full overflow-hidden"
               style={{ 
@@ -104,75 +252,193 @@ const RestTimer = ({ restCountdown, customRestTime, skipRest, nextExercise }) =>
               }}
             />
             <div className="absolute inset-2 bg-gray-800 rounded-full flex items-center justify-center">
-              <span className="text-5xl font-mono text-white z-10">{restCountdown}</span>
+              <motion.span 
+                animate={{ scale: restCountdown <= 3 ? [1, 1.2, 1] : 1 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className="text-6xl font-mono text-white z-10 font-bold"
+              >
+                {restCountdown}
+              </motion.span>
             </div>
           </div>
         </div>
-        <p className="mb-2 text-gray-300">
-          Coming up next:
-        </p>
-        <p className="mb-6 text-xl font-semibold text-white">
-          {nextExercise || "Next set"}
-        </p>
+
+        <div className="mb-6 p-3 rounded-lg bg-gray-700 bg-opacity-50">
+          <p className="text-gray-300 text-sm italic">"{randomQuote}"</p>
+        </div>
+        
+        <div className="mb-6">
+          <p className="text-sm font-medium text-gray-400 mb-2">
+            Coming up next:
+          </p>
+          <div className="p-3 bg-blue-900/30 rounded-lg">
+            <p className="text-xl font-semibold text-blue-200">
+              {nextExercise || "Next set"}
+            </p>
+          </div>
+        </div>
+        
         <button 
           onClick={skipRest}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors"
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors flex items-center justify-center space-x-2"
         >
-          Skip Rest
+          <span>Skip Rest</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
         </button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
 
 // Component for congratulations modal
 const CongratsModal = ({ elapsedTime, workoutStats, closeCongrats, darkMode }) => {
+  // Motivational completion quotes
+  const completionQuotes = [
+    "Every workout is a step toward your stronger self.",
+    "Today's effort is tomorrow's strength.",
+    "You didn't just complete a workout, you invested in yourself.",
+    "Celebrate the small wins - they add up to big results.",
+    "Success isn't built in a day, but it's built daily."
+  ];
+  
+  // Random motivational quote
+  const randomQuote = completionQuotes[Math.floor(Math.random() * completionQuotes.length)];
+  
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
       className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70"
     >
-      <div className={`p-8 rounded-xl shadow-xl ${darkMode ? 'bg-gray-800' : 'bg-white'} max-w-md w-full text-center`}>
-        <motion.div 
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, type: 'spring' }}
-          className="mb-4 text-5xl"
-        >
-          🏆
-        </motion.div>
-        <h2 className="text-2xl font-bold mb-4">Workout Complete!</h2>
-        <div className="mb-6">
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Duration</p>
-              <p className="text-xl font-mono font-semibold">{formatTime(elapsedTime)}</p>
-            </div>
-            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Exercises</p>
-              <p className="text-xl font-semibold">{workoutStats.exercises}</p>
-            </div>
-            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Sets</p>
-              <p className="text-xl font-semibold">{workoutStats.sets}</p>
-            </div>
-            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Calories</p>
-              <p className="text-xl font-semibold">~{workoutStats.calories}</p>
-            </div>
-          </div>
-          <p className="text-lg font-medium mb-2">Great job! Keep it up!</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Your consistency is building a stronger you.</p>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.1 }}
+        className={`p-8 rounded-xl shadow-xl border ${darkMode ? 'bg-gray-800 border-green-500/20' : 'bg-white border-green-500/20'} max-w-md w-full text-center`}
+      >
+        <div className="relative mb-8">
+          <motion.div 
+            initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            transition={{ delay: 0.3, type: 'spring', bounce: 0.5 }}
+            className="text-6xl absolute -top-4 -left-2 z-10"
+          >
+            🏆
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h2 className="text-3xl font-bold">Workout Complete!</h2>
+            <div className="h-1 w-20 bg-green-500 mx-auto mt-2 rounded-full"></div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.7, type: 'spring' }}
+            className="absolute -top-2 -right-2 text-4xl"
+          >
+            💪
+          </motion.div>
         </div>
-        <button 
-          onClick={closeCongrats}
-          className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors"
+        
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mb-6"
         >
-          Close
-        </button>
-      </div>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+              className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-green-50'} flex flex-col items-center justify-center`}
+            >
+              <div className="text-green-500 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Duration</p>
+              <p className="text-xl font-mono font-semibold">{formatTime(elapsedTime)}</p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+              className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-green-50'} flex flex-col items-center justify-center`}
+            >
+              <div className="text-green-500 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Exercises</p>
+              <p className="text-xl font-semibold">{workoutStats.exercises}</p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.9 }}
+              className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-green-50'} flex flex-col items-center justify-center`}
+            >
+              <div className="text-green-500 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Sets</p>
+              <p className="text-xl font-semibold">{workoutStats.sets}</p>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1 }}
+              className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-green-50'} flex flex-col items-center justify-center`}
+            >
+              <div className="text-green-500 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Calories</p>
+              <p className="text-xl font-semibold">~{workoutStats.calories}</p>
+            </motion.div>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            className={`p-4 rounded-lg mb-4 ${darkMode ? 'bg-green-900/20' : 'bg-green-50'}`}
+          >
+            <p className="text-sm italic">"{randomQuote}"</p>
+          </motion.div>
+        </motion.div>
+        
+        <motion.button 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2 }}
+          onClick={closeCongrats}
+          className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-medium rounded-md shadow-sm transition-colors flex items-center justify-center space-x-2"
+        >
+          <span>Continue</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </motion.button>
+      </motion.div>
     </motion.div>
   );
 };
@@ -735,7 +1001,8 @@ const Header = ({
   setDarkMode, 
   active, 
   progressPercentage, 
-  elapsedTime 
+  elapsedTime,
+  day
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   
@@ -747,25 +1014,39 @@ const Header = ({
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Your personal fitness companion
           </p>
+          {active && (
+            <div className="mt-1">
+              <span className={`inline-block px-2 py-1 text-xs rounded-full ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} mt-1`}>
+                {day} - {dayMuscleGroupMap[day]} Focus
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-3">
           {/* Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-full ${
-              darkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-800'
+            className={`p-2 rounded-full transition-colors duration-200 ${
+              darkMode ? 'bg-gray-700 text-yellow-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
             }`}
             aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {darkMode ? '☀️' : '🌙'}
+            <motion.span
+              initial={{ rotate: 0 }}
+              animate={{ rotate: darkMode ? 360 : 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-block"
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </motion.span>
           </button>
 
           {/* Menu Button */}
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`p-2 rounded-full ${
-                darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               aria-label="Menu"
             >
@@ -773,55 +1054,89 @@ const Header = ({
             </button>
 
             {menuOpen && (
-              <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg overflow-hidden z-10 ${
-                darkMode ? 'bg-gray-800' : 'bg-white'
-              }`}>
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg overflow-hidden z-10 ${
+                  darkMode ? 'bg-gray-800' : 'bg-white'
+                }`}>
                 <ul>
                   <li>
                     <a
                       href="https://iamdusty.github.io/CalTracker/"
-                      className={`block px-4 py-3 text-sm ${
+                      className={`block px-4 py-3 text-sm transition-colors duration-200 ${
                         darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      Calorie Tracker
+                      <div className="flex items-center">
+                        <span className="mr-2">📊</span>
+                        <span>Calorie Tracker</span>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/iamdusty/Workout"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`block px-4 py-3 text-sm transition-colors duration-200 ${
+                        darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span className="mr-2">📁</span>
+                        <span>GitHub Repo</span>
+                      </div>
                     </a>
                   </li>
                   <li>
                     <button
                       onClick={() => setMenuOpen(false)} 
-                      className={`block w-full text-left px-4 py-3 text-sm ${
+                      className={`block w-full text-left px-4 py-3 text-sm transition-colors duration-200 ${
                         darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      Home
+                      <div className="flex items-center">
+                        <span className="mr-2">🏠</span>
+                        <span>Home</span>
+                      </div>
                     </button>
                   </li>
                 </ul>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
       </div>
       
       {active && (
-        <div className="mt-4">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 p-3 rounded-lg bg-opacity-10 bg-blue-500 dark:bg-opacity-10">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-sm font-medium">Workout Progress</span>
-            <span className="text-sm font-medium">{Math.round(progressPercentage)}%</span>
+            <div className="flex items-center">
+              <span className="text-sm font-medium mr-2">Workout Progress</span>
+              <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
+                {Math.round(progressPercentage)}%
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-xs mr-2">⏱</span>
+              <span className="font-mono text-sm">{formatTime(elapsedTime)}</span>
+            </div>
           </div>
-          <div className="w-full bg-gray-300 rounded-full h-2.5 dark:bg-gray-700">
+          <div className="w-full bg-gray-300 rounded-full h-3 dark:bg-gray-700 overflow-hidden">
             <motion.div 
-              className="bg-blue-600 h-2.5 rounded-full"
+              className="bg-blue-600 h-3 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.5 }}
-            ></motion.div>
+            >
+              <div className="h-full w-full bg-opacity-50 bg-white animate-pulse"></div>
+            </motion.div>
           </div>
-          <div className="text-right text-sm mt-1">
-            <span className="font-mono">{formatTime(elapsedTime)}</span>
-          </div>
-        </div>
+        </motion.div>
       )}
     </header>
   );
@@ -1051,6 +1366,7 @@ function App() {
           active={active} 
           progressPercentage={progressPercentage} 
           elapsedTime={elapsedTime}
+          day={day}
         />
 
         {active ? (
